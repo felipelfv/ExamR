@@ -1,0 +1,84 @@
+---
+title: "Exam 2024"
+author: "Felipe Luiz Fontana Vieira"
+date: "2024-01-18"
+output:
+  html_document:
+    code_folding: hide
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("chisquared.R", local = knitr::knit_global())
+```
+
+```{r packages, include=FALSE}
+# Loading packages needed for this exam
+library(tidyverse)
+library(readxl)
+library(reshape2)
+library(ggplot2)
+```
+
+### Exercise 1
+
+```{r first, message=FALSE}
+health <- read_excel("~/Desktop/RJan2024_Felipe_Vieira/health2.xls")
+```
+
+### Exercise 2
+
+```{r second}
+health_newcolumns <- health %>%  
+  mutate(Gender = str_extract(`...1`, "^[MF]"),
+         Age = str_extract(`...1`, "\\d+-\\d+|\\d+\\+?$")) %>%
+  select(-`...1`)
+```
+
+### Exercise 3
+
+```{r third}
+health_melted <- melt(health_newcolumns, id.vars = c("Gender", "Age"), 
+                  measure.vars = c("VeryGood", "Good", "Regular", "Bad", "VeryBad"), 
+                  variable.name = "Response", 
+                  value.name = "Frequency")
+```
+
+### Exercise 4
+
+```{r fourth}
+total_frequencies <- aggregate(Frequency ~ Gender + Age, data = health_melted, FUN = sum)
+
+ggplot(total_frequencies, aes(fill=Gender, y=Frequency, x=Age)) + 
+  geom_bar(position="dodge", stat="identity") +
+  theme_minimal() +
+  labs(x = "Age", y = "Frequency", fill = "Gender") +
+  ggtitle("Frequencies of Gender and Age")
+```
+
+### Exercise 5
+
+```{r fifth}
+ggplot(health_melted, aes(fill=Response, y=Frequency, x=Age)) + 
+  geom_bar(position="stack", stat="identity") +
+  theme_minimal() + 
+  labs(x = "Age", y = "Frequency", fill = "Response") +
+  facet_grid(Gender ~ .,) +
+  ggtitle("Frequencies of Responses per Age and Gender")
+```
+
+### Exercise 6
+
+```{r}
+
+```
+
+### Exercise 7
+
+```{r seventh}
+# For the last sentence:
+output <- chisquared_statistic(as.matrix(health_newcolumns[ ,1:5]))
+```
+
+The Pearson Chi-Squared statistic of the matrix `as.matrix(health22[,1:5]` is `r round(output,3)`.
